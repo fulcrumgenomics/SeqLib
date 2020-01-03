@@ -681,6 +681,14 @@ class BamRecord {
       return p;
     }
 
+  inline int32_t NMwithClipping() const {
+    int32_t nm=0;
+    uint8_t* p1 = bam_aux_get(b.get(), "NM");
+    if (p1){
+      nm = bam_aux2i(p1);
+    }
+    return NumClip() + nm;
+  }
 
   /** Get the number of clipped bases (hard clipped and soft clipped) */
   inline int32_t NumClip() const {
