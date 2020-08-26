@@ -86,6 +86,7 @@ class GenomicRegionCollection {
    * @return True if file was succesfully read
    */
    bool ReadBED(const std::string &file, const SeqLib::BamHeader& hdr);
+   bool ReadBED(const std::string & file, const faidx_t* fai);
 
   /** Read in a VCF file and adds to GenomicRegionCollection object
    * @param file Path to VCF file. All elements will be width = 1 (just read start point)

@@ -44,7 +44,8 @@ namespace SeqLib {
     bool IsEmpty() const { 
       return (index == NULL); 
     }
-    
+
+    faidx_t* Index() {return index;};
   private:
 
     faidx_t * index;
