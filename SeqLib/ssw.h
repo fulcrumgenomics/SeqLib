@@ -3,8 +3,8 @@
  *
  *  Created by Mengyao Zhao on 6/22/10.
  *  Copyright 2010 Boston College. All rights reserved.
- *	Version 0.1.4
- *	Last revision by Mengyao Zhao on 02/11/16.
+ *	Version 1.2.3
+ *	Last revision by Mengyao Zhao on 11/29/16.
  *
  */
 
@@ -22,9 +22,10 @@ extern "C" {
 
 #define MAPSTR "MIDNSHP=X"
 #ifndef BAM_CIGAR_SHIFT
-#define BAM_CIGAR_SHIFT 4
+#define BAM_CIGAR_SHIFT 4u
 #endif
 
+extern const uint8_t encoded_ops[];
 
 /*!	@typedef	structure of the query profile	*/
 struct _profile;
@@ -129,58 +130,57 @@ s_align* ssw_align (const s_profile* prof,
 */
 void align_destroy (s_align* a);
 
+/*! @function:
+     1. Calculate the number of mismatches.
+     2. Modify the cigar string:
+         differentiate matches (=), mismatches(X), and softclip(S).
+	@param	ref_begin1	0-based best alignment beginning position on the reference sequence
+	@param	read_begin1	0-based best alignment beginning position on the read sequence
+	@param	read_end1	0-based best alignment ending position on the read sequence
+	@param	ref	pointer to the reference sequence
+	@param	read	pointer to the read sequence
+	@param	readLen	length of the read
+	@param	cigar	best alignment cigar; stored the same as that in BAM format, high 28 bits: length, low 4 bits: M/I/D (0/1/2)
+	@param	cigarLen	length of the cigar string
+ 	@return:
+     The number of mismatches.
+	 The cigar and cigarLen are modified.
+*/
+int32_t mark_mismatch (int32_t ref_begin1,
+					   int32_t read_begin1,
+					   int32_t read_end1,
+					   const int8_t* ref,
+					   const int8_t* read,
+					   int32_t readLen,
+					   uint32_t** cigar, 
+					   int32_t* cigarLen);
+
 /*!	@function		Produce CIGAR 32-bit unsigned integer from CIGAR operation and CIGAR length
 	@param	length		length of CIGAR
 	@param	op_letter	CIGAR operation character ('M', 'I', etc)
 	@return			32-bit unsigned integer, representing encoded CIGAR operation and length
 */
-static inline uint32_t to_cigar_int (uint32_t length, char op_letter)
-{
-	switch (op_letter) {
-		case 'M': /* alignment match (can be a sequence match or mismatch */
-		default:
-			return length << BAM_CIGAR_SHIFT;
-		case 'S': /* soft clipping (clipped sequences present in SEQ) */
-			return (length << BAM_CIGAR_SHIFT) | (4u);
-		case 'D': /* deletion from the reference */
-			return (length << BAM_CIGAR_SHIFT) | (2u);
-		case 'I': /* insertion to the reference */
-			return (length << BAM_CIGAR_SHIFT) | (1u);
-		case 'H': /* hard clipping (clipped sequences NOT present in SEQ) */
-			return (length << BAM_CIGAR_SHIFT) | (5u);
-		case 'N': /* skipped region from the reference */
-			return (length << BAM_CIGAR_SHIFT) | (3u);
-		case 'P': /* padding (silent deletion from padded reference) */
-			return (length << BAM_CIGAR_SHIFT) | (6u);
-		case '=': /* sequence match */
-			return (length << BAM_CIGAR_SHIFT) | (7u);
-		case 'X': /* sequence mismatch */
-			return (length << BAM_CIGAR_SHIFT) | (8u);
-	}
-	return (uint32_t)-1; // This never happens
+static inline uint32_t to_cigar_int (uint32_t length, char op_letter) {
+	return (length << BAM_CIGAR_SHIFT) | (encoded_ops[(int)op_letter]);
 }
-
 
 /*!	@function		Extract CIGAR operation character from CIGAR 32-bit unsigned integer
 	@param	cigar_int	32-bit unsigned integer, representing encoded CIGAR operation and length
 	@return			CIGAR operation character ('M', 'I', etc)
 */
 //char cigar_int_to_op (uint32_t cigar_int);
-static inline char cigar_int_to_op(uint32_t cigar_int) 
-{
+static inline char cigar_int_to_op(uint32_t cigar_int) {
 	return (cigar_int & 0xfU) > 8 ? 'M': MAPSTR[cigar_int & 0xfU];
 }
-
 
 /*!	@function		Extract length of a CIGAR operation from CIGAR 32-bit unsigned integer
 	@param	cigar_int	32-bit unsigned integer, representing encoded CIGAR operation and length
 	@return			length of CIGAR operation
 */
-//uint32_t cigar_int_to_len (uint32_t cigar_int);
-static inline uint32_t cigar_int_to_len (uint32_t cigar_int)
-{
+static inline uint32_t cigar_int_to_len (uint32_t cigar_int) {
 	return cigar_int >> BAM_CIGAR_SHIFT;
 }
+
 #ifdef __cplusplus
 }
 #endif	// __cplusplus

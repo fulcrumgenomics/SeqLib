@@ -148,7 +148,7 @@ namespace SeqLib {
     // Declares an alignment that stores the result
     StripedSmithWaterman::Alignment alignment;
     // Aligns the seq to the ref
-    aligner.Align(seq.c_str(), ref.c_str(), ref.size(), filter, &alignment);
+    aligner.Align(seq.c_str(), ref.c_str(), ref.size(), filter, &alignment, seq.size());
 
     init();
     b->core.tid = gr->chr;
