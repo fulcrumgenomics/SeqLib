@@ -174,6 +174,75 @@ bool GenomicRegionCollection<T>::ReadBED(const std::string & file, const BamHead
 }
 
 template<class T>
+bool GenomicRegionCollection<T>::ReadBED(const std::string & file, const faidx_t* fai) {
+
+  m_sorted = false;
+  idx = 0;
+
+  gzFile fp = NULL;
+  fp = strcmp(file.c_str(), "-")? gzopen(file.c_str(), "r") : gzdopen(fileno(stdin), "r");
+
+  if (file.empty() || !fp) {
+    std::cerr << "BED file not readable: " << file << std::endl;
+    return false;
+  }
+  assert(fai != NULL);
+  std::map<std::string, int32_t> name_id;
+  faidx_nseq(fai);
+  for (int i = 0; i < faidx_nseq(fai); ++i) {
+    name_id[faidx_iseq(fai, i)] = i;
+  }
+
+
+  // http://www.lemoda.net/c/gzfile-read/
+  while (1) {
+
+    int err;
+    char buffer[GZBUFFER];
+    gzgets(fp, buffer, GZBUFFER);
+    int bytes_read = strlen(buffer);
+
+    // get one line
+    if (bytes_read < GZBUFFER - 1) {
+      if (gzeof (fp)) break;
+      else {
+        const char * error_string;
+        error_string = gzerror (fp, &err);
+        if (err) {
+          fprintf (stderr, "Error: %s.\n", error_string);
+          exit (EXIT_FAILURE);
+        }
+      }
+    }
+
+    // prepare to loop through each field of BED line
+    //size_t counter = 0;
+    std::string chr;
+    int32_t pos1, pos2;
+    std::string line(buffer);
+    std::istringstream iss_line(line);
+    std::string val;
+    if (line.find("#") != std::string::npos)
+      continue;
+
+    // read first three BED columns
+    iss_line >> chr >> pos1 >> pos2;
+
+    // construct the GenomicRegion
+    if (name_id.find(chr) == name_id.end()) {
+      throw std::runtime_error(chr + " not found in fasta file");
+    }
+    int32_t cid = name_id[chr];
+    T gr(cid, pos1, pos2);
+
+    if (gr.chr >= 0)
+      m_grv->push_back(gr);
+  }
+
+  return true;
+}
+
+template<class T>
 bool GenomicRegionCollection<T>::ReadVCF(const std::string & file, const BamHeader& hdr) {
 
   m_sorted = false;
