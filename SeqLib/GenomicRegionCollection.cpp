@@ -127,6 +127,7 @@ bool GenomicRegionCollection<T>::ReadBED(const std::string & file, const BamHead
 
   if (file.empty() || !fp) {
     std::cerr << "BED file not readable: " << file << std::endl;
+    gzclose(fp);
     return false;
   }
 
@@ -146,7 +147,8 @@ bool GenomicRegionCollection<T>::ReadBED(const std::string & file, const BamHead
 	error_string = gzerror (fp, &err);
 	if (err) {
 	  fprintf (stderr, "Error: %s.\n", error_string);
-	  exit (EXIT_FAILURE);
+      gzclose(fp);
+      exit (EXIT_FAILURE);
 	}
       }
     }
@@ -170,6 +172,7 @@ bool GenomicRegionCollection<T>::ReadBED(const std::string & file, const BamHead
       m_grv->push_back(gr);
   }
 
+  gzclose(fp);
   return true;
 }
 
@@ -184,6 +187,7 @@ bool GenomicRegionCollection<T>::ReadBED(const std::string & file, const faidx_t
 
   if (file.empty() || !fp) {
     std::cerr << "BED file not readable: " << file << std::endl;
+    gzclose(fp);
     return false;
   }
   assert(fai != NULL);
@@ -210,6 +214,7 @@ bool GenomicRegionCollection<T>::ReadBED(const std::string & file, const faidx_t
         error_string = gzerror (fp, &err);
         if (err) {
           fprintf (stderr, "Error: %s.\n", error_string);
+          gzclose(fp);
           exit (EXIT_FAILURE);
         }
       }
@@ -239,6 +244,7 @@ bool GenomicRegionCollection<T>::ReadBED(const std::string & file, const faidx_t
       m_grv->push_back(gr);
   }
 
+  gzclose(fp);
   return true;
 }
 
