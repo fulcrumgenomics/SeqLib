@@ -370,12 +370,14 @@ namespace SeqLib {
       out << "empty read";
       return out;
     }
+    int nm = 0;
+    r.GetIntTag("NM", nm);
     out << bam_get_qname(r.b) << "\t" << r.b->core.flag
 	<< "\t" << (r.b->core.tid+1) << "\t" << r.b->core.pos 
-	<< "\t" << r.b->core.qual << "\t" << r.CigarString() 
+	<< "\t" << static_cast<int32_t >(r.b->core.qual) << "\t" << r.CigarString()
 	<< "\t" << (r.b->core.mtid+1) << "\t" << r.b->core.mpos << "\t" 
         << r.FullInsertSize() //r.b->core.isize 
-	<< "\t" << r.Sequence() << "\t*" << std::endl;
+	<< "\t" << r.Sequence() << "\t*\tNM:i:" << nm << std::endl;
     return out;
       
     
