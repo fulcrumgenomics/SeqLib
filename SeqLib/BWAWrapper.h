@@ -101,6 +101,8 @@ class BWAWrapper {
   /** Return the raw index in bwaidx_t form */
   bwaidx_t* GetIndex() const { return idx; }
 
+  mem_opt_t* GetMemOpt() const {return memopt;}
+
   /** Return the number of reference sequences in current index
    * @return Number of reference sequences, or 0 if uninitialized
    */
