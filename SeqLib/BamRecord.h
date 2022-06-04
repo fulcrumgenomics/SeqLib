@@ -241,6 +241,9 @@ class BamRecord {
   /** Make a BamRecord with no memory allocated and a null header */
   BamRecord() {}
 
+  /** Make a copy **/
+  BamRecord(bam1_t* a);
+
   /** BamRecord is aligned on reverse strand */
   inline bool ReverseFlag() const { return b ? ((b->core.flag&BAM_FREVERSE) != 0) : false; }
 

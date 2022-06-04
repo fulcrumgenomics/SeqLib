@@ -41,6 +41,11 @@ namespace SeqLib {
     b = SeqPointer<bam1_t>(a, free_delete()); 
   }
 
+  BamRecord::BamRecord(bam1_t* other) {
+    this->init();
+    bam_copy1(this->raw(), other);
+  }
+
   int32_t BamRecord::PositionWithSClips() const {
     if(!b) return -1; // to be consistent with BamRecord::Position()
 
