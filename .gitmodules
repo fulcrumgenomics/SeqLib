@@ -6,4 +6,4 @@
 	url = https://github.com/samtools/htslib
 [submodule "bwa"]
 	path = bwa
-	url = https://github.com/walaj/bwa
+	url = https://github.com/ruolin/bwa
